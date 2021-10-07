@@ -23,11 +23,40 @@
           </div>
         </div>
         <div class="row">
-          <div id="controlLeft" class="col-6 col-sm-6 col-md-6">          
+          <div id="controlLeft" class="col-6 col-sm-6 col-md-6">
+            <input type="text" id="channel-name-audio">  
             <button id="startCall">시작</button>        
           </div>
           <div id="controlRight" class="col-6 col-sm-6 col-md-6">          
             <button id="stopCall">종료</button>        
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 col-sm-12 col-md-12">
+            <div id="channelIdAuido"></div>
+            <div id="channelStateAudio"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="row">
+          <div id="you" class="col-12 col-sm-6 col-md-6">
+            <h2>상대방</h2>
+            <audio id="remoteAudio" class="remoteVideo" autoplay playsinline></audio>
+          </div>
+          <div id="me" class="col-12 col-sm-6 col-md-6">
+            <h2>나</h2>
+            <audio id="localAudio" class="localVideo" autoplay playsinline></audio>
+          </div>
+        </div>
+        <div class="row">
+          <div id="" class="col-6 col-sm-6 col-md-6">
+            <input type="text" id="channel-name">  
+            <button id="startAudio">시작</button>        
+          </div>
+          <div id="" class="col-6 col-sm-6 col-md-6">          
+            <button id="stopAudio">종료</button>        
           </div>
         </div>
         <div class="row">
@@ -38,9 +67,7 @@
         </div>
       </div>
     </main>
-    <footer>
-      <p>리모트몬스터 제공</p>
-    </footer>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.slim.min.js"></script>  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>  
 
@@ -78,13 +105,74 @@
     });
 
     $('#startCall').click(function () {
-        remonCall.connectCall('test');
+        var channel = document.querySelector('#channel-name-audio').value
+        remonCall.connectCall(channel);
     }); 
 
     // "종료" 버튼을 클릭하면 통화채널에서 나갑니다.    
     $('#stopCall').click(function() {
       remonCall.close();    
-    });  
+    });
+
+    // audio
+    const audioConfig = {
+      credential: {
+        serviceId: 'abcd01ba-d4e9-4e1a-af04-edb9499fe884',
+        key: '07444b6f4fa64ec480a31928c38285ca32c0316a4fb8bbe0866dd8f9a90b0cd3'
+      },
+      view: {
+        remote: '#remoteVideo',
+        local: '#localVideo'
+      },
+      media: {
+        audio: true,
+        video: false,
+      }
+    };
+    const audioListener = {
+      onConnect(chid) {
+        $('#channelIdAudio').text(chid);
+        $('#channelStateAudio').text("대기 중");
+        console.error(`EVENT FIRED: onConnect: ${chid}`);
+      },
+      onComplete() {
+        $('#channelStateAudio').text("통화 중");
+        console.log(`onComplete`);
+        console.error('EVENT FIRED: onComplete');
+      },
+      onDisconnectChannel() {
+        // is called when other peer hang up.
+        audioRemonCall.close();
+      },
+      onClose() {
+        // is called when remon.close() method is called.
+        console.error('EVENT FIRED: onClose');
+        audioRemonCall.close();
+      },
+      onError(error) {
+        console.error(`EVENT FIRED: onError: ${error}`);
+      },
+      onStat(result) {
+        console.error(`EVENT FIRED: onStat: ${result}`);
+      }
+    };
+
+    const audioRemonCall = new Remon({
+        config: audioConfig,
+        listener: audioListener
+    });
+
+    $('#startAudio').click(function () {
+        var channel = document.querySelector('#channel-name').value
+        audioRemonCall.connectCall(channel);
+    }); 
+
+    // "종료" 버튼을 클릭하면 통화채널에서 나갑니다.    
+    $('#stopAudio').click(function() {
+      audioRemonCall.close();    
+    });
+
+
     </script>
   </body>
 </html>
